@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Client</title>
+    <style>
+        body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a, #3a3a3a, #1f1f1f);
+    background-size: 300% 300%;
+    animation: gradientBG 12s ease infinite;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    color: #fff;
+  }
+
+
+          @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+
+          header {
+            text-align: center;
+            padding: 40px 20px 10px 20px;
+          }
+
+          h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+          }
+
+          p {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #f0f0f0;
+          }
+
+          .container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            padding: 25px;
+            width: 90%;
+            max-width: 420px;
+            margin-top: 20px;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+
+          input {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            outline: none;
+            width: 65%;
+            margin-right: 5px;
+            font-size: 1rem;
+          }
+
+          button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+          }
+
+          button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+          }
+
+          .weather-card {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: left;
+            color: #fff;
+          }
+
+          .weather-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+          }
+
+          .weather-card p {
+            margin: 6px 0;
+            font-size: 1.1rem;
+          }
+
+          .error {
+            color: #ff4d6d;
+            margin-top: 10px;
+            font-weight: bold;
+          }
+    </style>
+</head>
+<body>
+<header>
+    <h1> Weather Client</h1>
+    <p>Find live weather updates of any city in style!</p>
+</header>
+
+<div class="container">
+    <input type="text" id="cityInput" placeholder="Enter city (e.g. London)" />
+    <button onclick="getWeather()">Search</button>
+    <div id="weatherResult"></div>
+    <p id="error" class="error"></p>
+</div>
+
+<script>
+    async function getWeather() {
+      const city = document.getElementById("cityInput").value.trim();
+      const resultDiv = document.getElementById("weatherResult");
+      const errorDiv = document.getElementById("error");
+      resultDiv.innerHTML = "";
+      errorDiv.textContent = "";
+
+      if (!city) {
+        errorDiv.textContent = "⚠️ Please enter a city name.";
+        return;
+      }
+
+      try {
+        const url = `http://localhost:8080/api/weather/current?city=${encodeURIComponent(city)}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error("City not found or API error.");
+        }
+
+        const data = await response.json();
+
+        resultDiv.innerHTML = `
+          <div class="weather-card">
+            <h2>${data.city}</h2>
+            <p><strong>🌡️ Temperature:</strong> ${data.temperature} °C</p>
+            <p><strong>🌤️ Condition:</strong> ${data.description}</p>
+            <p><strong>💧 Humidity:</strong> ${data.humidity}%</p>
+            <p><strong>🌬️ Wind:</strong> ${data.windSpeed} m/s</p>
+          </div>
+        `;
+      } catch (err) {
+        errorDiv.textContent = "❌ Error: " + err.message;
+      }
+    }
+</script>
+</body>
+</html>
